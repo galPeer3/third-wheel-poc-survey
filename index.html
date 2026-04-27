@@ -476,6 +476,11 @@
     cursor: not-allowed;
   }
 
+  #summary::-webkit-scrollbar { width: 4px; }
+  #summary::-webkit-scrollbar-track { background: var(--warm); border-radius: 4px; }
+  #summary::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  #summary::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
   .other-text {
     border: 1.5px solid var(--border);
     border-radius: 10px;
@@ -889,9 +894,21 @@
         Your answers will directly shape what we build. We're working hard to make Third Wheel something couples actually love using every day.
         <br><br>
         </p>
-      <div style="margin-top:40px; padding: 24px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display:inline-block; text-align:left; max-width: 400px; width:100%">
+      <div style="margin-top:40px; padding: 24px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); text-align:left; max-width: 480px; width:100%; margin-left:auto; margin-right:auto;">
         <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; font-weight:500;">Your answers summary</div>
-        <div id="summary" style="font-size:0.9rem; line-height:1.8; color:var(--ink);"></div>
+        <div id="summary" style="font-size:0.9rem; line-height:1.8; color:var(--ink); max-height: 280px; overflow-y: auto; padding-right: 8px;"></div>
+      </div>
+      <div id="submitWrap" style="margin-top: 24px;">
+        <button class="btn-next" id="submitBtn" onclick="handleSubmit()" style="background: var(--accent); font-size:1rem; padding: 16px 36px;">
+          Submit answers 🪺
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div style="margin-top: 10px; font-size:0.8rem; color:var(--muted);">Once submitted you won't be able to change your answers.</div>
+      </div>
+      <div id="submittedMsg" style="display:none; margin-top:24px; padding: 16px 24px; background:#F0FDF4; border: 1.5px solid #86EFAC; border-radius: 12px; color: #166534; font-size:0.95rem; font-weight:500;">
+        ✅ Submitted! Thank you so much — we'll be in touch. 🪺
       </div>
     </div>
   </div>
@@ -949,7 +966,7 @@
     slides[current].classList.remove('exit');
     slides[current].classList.add('active');
     
-    if (current === TOTAL) { buildSummary(); submitToSheet(); }
+    if (current === TOTAL) { buildSummary(); }
     updateProgress();
     
     setTimeout(() => {
@@ -1080,6 +1097,35 @@
 
   // Google Sheets submission
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAgjK1YEsOiqcdbZjnPx2dchrRcsd15qcYib5WBbre8qd6nRh7iUMOXsk7m3muYTwCeA/exec';
+
+  let submitted = false;
+
+  async function handleSubmit() {
+    if (submitted) return;
+    submitted = true;
+
+    // Disable submit button
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.textContent = 'Submitting...';
+
+    // Lock all slides — disable all inputs and choices
+    document.querySelectorAll('.choice, .scale-btn, .feature-card, .text-input, .other-text').forEach(el => {
+      el.style.pointerEvents = 'none';
+      el.style.opacity = '0.6';
+    });
+
+    // Disable nav
+    document.getElementById('prevBtn').disabled = true;
+    document.getElementById('nextBtn').disabled = true;
+
+    await submitToSheet();
+
+    // Show success, hide submit wrap
+    document.getElementById('submitWrap').style.display = 'none';
+    document.getElementById('submittedMsg').style.display = 'block';
+  }
 
   async function submitToSheet() {
     const q10val = document.getElementById('q10')?.value;
