@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Third Wheel — Couples Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --warm: #EDE7DC;
+    --ink: #1C1917;
+    --muted: #78716C;
+    --accent: #C2410C;
+    --accent-light: #FED7AA;
+    --gold: #D97706;
+    --surface: #FFFFFF;
+    --border: #E7DDD4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 50;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .progress-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* Slides container */
+  .slides {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Individual slide */
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 40px 80px;
+    opacity: 0;
+    transform: translateY(60px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+
+  .slide-inner {
+    max-width: 680px;
+    width: 100%;
+  }
+
+  /* Question number */
+  .q-number {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .q-number::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* Question text */
+  .q-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .q-subtitle {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 40px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* Text input */
+  .text-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    padding: 12px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.3s;
+    caret-color: var(--accent);
+  }
+
+  .text-input::placeholder { color: var(--border); }
+
+  .text-input:focus { border-bottom-color: var(--accent); }
+
+  textarea.text-input {
+    resize: none;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 120px;
+    transition: border-color 0.3s;
+  }
+
+  textarea.text-input:focus { border-color: var(--accent); }
+
+  /* Choice options */
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .choice:hover {
+    border-color: var(--accent);
+    background: #FFF8F5;
+    transform: translateX(4px);
+  }
+
+  .choice.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .choice-key {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--warm);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .choice.selected .choice-key {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Scale rating */
+  .scale {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .scale-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .scale-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .scale-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* Feature ranking */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .feature-card {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .feature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .feature-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .feature-rank {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-emoji { font-size: 1.4rem; margin-bottom: 6px; }
+
+  .feature-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .feature-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  /* CTA Button */
+  .btn-next {
+    margin-top: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-next:hover {
+    background: #9A3412;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(194, 65, 12, 0.3);
+  }
+
+  .btn-next svg { transition: transform 0.2s; }
+  .btn-next:hover svg { transform: translateX(3px); }
+
+  .btn-hint {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* Welcome slide */
+  .welcome-slide .q-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    margin-bottom: 20px;
+  }
+
+  .welcome-emoji {
+    font-size: 3rem;
+    margin-bottom: 24px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .welcome-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .pill {
+    padding: 6px 14px;
+    background: var(--warm);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* Thank you slide */
+  .thankyou-slide {
+    text-align: center;
+  }
+
+  .thankyou-slide .q-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .heart-anim {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 24px;
+    animation: heartbeat 1.2s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Decorative elements */
+  .bg-decoration {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .circle-1 {
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(194,65,12,0.06) 0%, transparent 70%);
+    top: -100px; right: -100px;
+  }
+
+  .circle-2 {
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,119,6,0.05) 0%, transparent 70%);
+    bottom: -50px; left: -80px;
+  }
+
+  /* Navigation arrows */
+  .nav-arrows {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    gap: 8px;
+    z-index: 50;
+  }
+
+  .nav-arrow {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+
+  .nav-arrow:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .other-text {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+  }
+  .other-text:focus { border-color: var(--accent); outline: none; }
+
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .slide { padding: 80px 20px 100px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .scale-btn { width: 44px; height: 44px; }
+    .nav-arrows { bottom: 20px; right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-decoration circle-1"></div>
+<div class="bg-decoration circle-2"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+  <div class="logo">Third <span>Wheel</span> 🪺</div>
+  <div class="progress-text" id="progressText">1 of 12</div>
+</nav>
+
+<div class="slides" id="slides">
+
+  <!-- SLIDE 0: Welcome -->
+  <div class="slide welcome-slide active" data-index="0">
+    <div class="slide-inner">
+      <span class="welcome-emoji">🪺</span>
+      <div class="q-title">Help us build the AI your relationship deserves.</div>
+      <p class="q-subtitle">We're building Third Wheel — an AI assistant that helps couples manage life together via WhatsApp. Before we build more, we want to hear from real couples. Takes 4 minutes.</p>
+      <div class="welcome-pills">
+        <span class="pill">🛒 Shopping lists</span>
+        <span class="pill">💸 Shared expenses</span>
+        <span class="pill">📅 Date nights</span>
+        <span class="pill">🏠 Home life</span>
+        <span class="pill">🎁 Gift ideas</span>
+        <span class="pill">🤖 AI powered</span>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Let's go
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: About them -->
+  <div class="slide" data-index="1">
+    <div class="slide-inner">
+      <div class="q-number">Question 1</div>
+      <div class="q-title">How long have you been together?</div>
+      <p class="q-subtitle">Just to understand where you are in your relationship.</p>
+      <div class="choices" id="q1">
+        <div class="choice" onclick="selectChoice('q1', this, 'Less than 1 year')">
+          <div class="choice-key">A</div> Less than 1 year
+        </div>
+        <div class="choice" onclick="selectChoice('q1', this, '1–3 years')">
+          <div class="choice-key">B</div> 1–3 years
+        </div>
+        <div class="choice" onclick="selectChoice('q1', this, '3–7 years')">
+          <div class="choice-key">C</div> 3–7 years
+        </div>
+        <div class="choice" onclick="selectChoice('q1', this, '7+ years')">
+          <div class="choice-key">D</div> 7+ years — veterans 💪
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Living situation -->
+  <div class="slide" data-index="2">
+    <div class="slide-inner">
+      <div class="q-number">Question 2</div>
+      <div class="q-title">Do you live together?</div>
+      <div class="choices" id="q2">
+        <div class="choice" onclick="selectChoice('q2', this, 'Yes, living together')">
+          <div class="choice-key">A</div> Yes, we live together
+        </div>
+        <div class="choice" onclick="selectChoice('q2', this, 'No, separate places')">
+          <div class="choice-key">B</div> No, separate places
+        </div>
+        <div class="choice" onclick="selectChoice('q2', this, 'Planning to move in')">
+          <div class="choice-key">C</div> Not yet but planning to
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Biggest pain -->
+  <div class="slide" data-index="3">
+    <div class="slide-inner">
+      <div class="q-number">Question 3</div>
+      <div class="q-title">What's the most annoying thing about managing life as a couple?</div>
+      <p class="q-subtitle">Select all that apply — be honest 😄</p>
+      <div class="choices" id="q3">
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Coordinating schedules')">
+          <div class="choice-key">A</div> Coordinating schedules and plans
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Shared expenses and splitting costs')">
+          <div class="choice-key">B</div> Shared expenses and splitting costs
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Mental load — remembering everything')">
+          <div class="choice-key">C</div> The mental load — one person remembers everything
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Planning date nights and activities')">
+          <div class="choice-key">D</div> Planning date nights and fun activities
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Grocery and household shopping')">
+          <div class="choice-key">E</div> Grocery and household shopping
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q3', this, 'Gifts and surprises')">
+          <div class="choice-key">F</div> Gifts and surprises for each other
+        </div>
+        <div class="choice multi other-choice" onclick="toggleOther('q3', this, 'other-input-q3')">
+          <div class="choice-key">G</div> Something else...
+        </div>
+        <div class="other-input-wrap" id="other-input-q3" style="display:none; margin-top:8px;">
+          <input type="text" class="text-input other-text" placeholder="Tell us what bothers you most..." oninput="setOtherValue('q3', this.value)">
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Current tools -->
+  <div class="slide" data-index="4">
+    <div class="slide-inner">
+      <div class="q-number">Question 4</div>
+      <div class="q-title">What do you currently use to manage life together?</div>
+      <p class="q-subtitle">Select all that apply.</p>
+      <div class="choices" id="q4">
+        <div class="choice multi" onclick="toggleChoice('q4', this, 'WhatsApp groups')">
+          <div class="choice-key">A</div> WhatsApp groups
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q4', this, 'Shared Google Calendar')">
+          <div class="choice-key">B</div> Shared Google Calendar
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q4', this, 'Notes app (Apple Notes, Notion etc)')">
+          <div class="choice-key">C</div> Notes app (Apple Notes, Notion etc)
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q4', this, 'Splitwise or similar')">
+          <div class="choice-key">D</div> Splitwise or similar expense app
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q4', this, 'Nothing — we just talk')">
+          <div class="choice-key">E</div> Nothing — we just talk
+        </div>
+        <div class="choice multi other-choice" onclick="toggleOther('q4', this, 'other-input-q4')">
+          <div class="choice-key">F</div> Something else...
+        </div>
+        <div class="other-input-wrap" id="other-input-q4" style="display:none; margin-top:8px;">
+          <input type="text" class="text-input other-text" placeholder="What do you use?" oninput="setOtherValue('q4', this.value)">
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: WhatsApp comfort -->
+  <div class="slide" data-index="5">
+    <div class="slide-inner">
+      <div class="q-number">Question 5</div>
+      <div class="q-title">How comfortable are you using WhatsApp for things beyond chatting?</div>
+      <p class="q-subtitle">Third Wheel lives entirely in WhatsApp — no app to download.</p>
+      <div class="scale" id="q5">
+        <button class="scale-btn" onclick="selectScale('q5', this, 1)">1</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 2)">2</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 3)">3</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 4)">4</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 5)">5</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 6)">6</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 7)">7</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 8)">8</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 9)">9</button>
+        <button class="scale-btn" onclick="selectScale('q5', this, 10)">10</button>
+      </div>
+      <div class="scale-labels">
+        <span>Not at all comfortable</span>
+        <span>Totally fine with it</span>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Feature ranking -->
+  <div class="slide" data-index="6">
+    <div class="slide-inner">
+      <div class="q-number">Question 6</div>
+      <div class="q-title">Pick your top 3 most valuable features.</div>
+      <p class="q-subtitle">Tap to select in order of priority. First tap = most important.</p>
+      <div class="features-grid" id="q6">
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Shopping list & grocery intelligence')">
+          <div class="feature-emoji">🛒</div>
+          <div class="feature-name">Smart Shopping List</div>
+          <div class="feature-hint">Shared list, meal suggestions</div>
+        </div>
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Shared expense tracking')">
+          <div class="feature-emoji">💸</div>
+          <div class="feature-name">Expense Tracking</div>
+          <div class="feature-hint">Log costs, see breakdowns</div>
+        </div>
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Date night planning')">
+          <div class="feature-emoji">🌙</div>
+          <div class="feature-name">Date Night Planner</div>
+          <div class="feature-hint">Books restaurant, calendar, directions</div>
+        </div>
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Google Calendar integration')">
+          <div class="feature-emoji">📅</div>
+          <div class="feature-name">Calendar Sync</div>
+          <div class="feature-hint">See both schedules, plan together</div>
+        </div>
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Couple Memory — dates, sizes & places')">
+          <div class="feature-emoji">🧠</div>
+          <div class="feature-name">Couple Memory</div>
+          <div class="feature-hint">Dates, sizes, places & everything that matters</div>
+        </div>
+        <div class="feature-card" onclick="rankFeature('q6', this, 'Home Brain — contacts & reminders')">
+          <div class="feature-emoji">🏠</div>
+          <div class="feature-name">Home Brain</div>
+          <div class="feature-hint">Shared contacts, tasks & reminders</div>
+        </div>
+<div class="feature-card" onclick="rankFeature('q6', this, 'Proactive reminders & suggestions')">
+          <div class="feature-emoji">🤖</div>
+          <div class="feature-name">Proactive AI</div>
+          <div class="feature-hint">Bot acts without being asked</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="choice multi other-choice" style="display:flex; align-items:center; gap:14px; padding:14px 20px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; cursor:pointer;" onclick="toggleOther('q6', this, 'other-input-q6')">
+          <div class="choice-key">+</div> A feature you don't see here...
+        </div>
+        <div class="other-input-wrap" id="other-input-q6" style="display:none; margin-top:8px;">
+          <input type="text" class="text-input other-text" placeholder="What feature would you love?" oninput="setOtherValue('q6', this.value)">
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Likelihood to use -->
+  <div class="slide" data-index="7">
+    <div class="slide-inner">
+      <div class="q-number">Question 7</div>
+      <div class="q-title">How likely are you to actually use Third Wheel?</div>
+      <p class="q-subtitle">An AI couples assistant that lives in WhatsApp — handles shopping, expenses, date nights, and more.</p>
+      <div class="scale" id="q7">
+        <button class="scale-btn" onclick="selectScale('q7', this, 1)">1</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 2)">2</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 3)">3</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 4)">4</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 5)">5</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 6)">6</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 7)">7</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 8)">8</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 9)">9</button>
+        <button class="scale-btn" onclick="selectScale('q7', this, 10)">10</button>
+      </div>
+      <div class="scale-labels">
+        <span>Definitely not</span>
+        <span>Sign me up now</span>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Willingness to pay -->
+  <div class="slide" data-index="8">
+    <div class="slide-inner">
+      <div class="q-number">Question 8</div>
+      <div class="q-title">If Third Wheel genuinely saved you time and stress — what would you pay per month?</div>
+      <p class="q-subtitle">Shared between both of you — like Netflix but for your relationship.</p>
+      <div class="choices" id="q8">
+        <div class="choice" onclick="selectChoice('q8', this, 'Nothing — it should be free')">
+          <div class="choice-key">A</div> Nothing — it should be free
+        </div>
+        <div class="choice" onclick="selectChoice('q8', this, '₪15–25/month')">
+          <div class="choice-key">B</div> ₪15–25/month — sure, why not
+        </div>
+        <div class="choice" onclick="selectChoice('q8', this, '₪30–50/month')">
+          <div class="choice-key">C</div> ₪30–50/month — if it really works
+        </div>
+        <div class="choice" onclick="selectChoice('q8', this, '₪50+/month')">
+          <div class="choice-key">D</div> ₪50+/month — if it saves that much stress
+        </div>
+        <div class="choice" onclick="selectChoice('q8', this, 'Depends on the features')">
+          <div class="choice-key">E</div> Depends on the specific features
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Dealbreakers -->
+  <div class="slide" data-index="9">
+    <div class="slide-inner">
+      <div class="q-number">Question 9</div>
+      <div class="q-title">What would stop you from using something like this?</div>
+      <p class="q-subtitle">Select all that apply — this is really important for us to know.</p>
+      <div class="choices" id="q9">
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Privacy concerns — AI knowing too much')">
+          <div class="choice-key">A</div> Privacy concerns — AI knowing too much about us
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Partner might not want to use it')">
+          <div class="choice-key">B</div> My partner probably wouldn't want to use it
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Too lazy to set it up')">
+          <div class="choice-key">C</div> Too lazy to set it up and onboard
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Would forget to use it')">
+          <div class="choice-key">D</div> We'd probably just forget to use it
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Not worth paying for')">
+          <div class="choice-key">E</div> I don't think it's worth paying for
+        </div>
+        <div class="choice multi" onclick="toggleChoice('q9', this, 'Nothing — I would use it')">
+          <div class="choice-key">F</div> Nothing — I'd use it 🙌
+        </div>
+      </div>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: Missing feature -->
+  <div class="slide" data-index="10">
+    <div class="slide-inner">
+      <div class="q-number">Question 10</div>
+      <div class="q-title">Is there something we haven't mentioned that you'd love an AI couples assistant to do?</div>
+      <p class="q-subtitle">Your wildest idea might be our next feature. Don't hold back.</p>
+      <textarea class="text-input" id="q10" placeholder="e.g. help us decide where to travel, remind us about medications, plan our weekly schedule..."></textarea>
+      <button class="btn-next" onclick="next()">
+        Next
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="btn-hint">Press Enter ↵ to continue</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: Thank you -->
+  <div class="slide thankyou-slide" data-index="11">
+    <div class="slide-inner" style="text-align:center">
+      <span class="heart-anim">🪺</span>
+      <div class="q-title">Thank you so much! 💛</div>
+      <p class="q-subtitle" style="margin-top:16px; max-width: 480px; margin-left:auto; margin-right:auto;">
+        Your answers will directly shape what we build. We're working hard to make Third Wheel something couples actually love using every day.
+        <br><br>
+        </p>
+      <div style="margin-top:40px; padding: 24px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); display:inline-block; text-align:left; max-width: 400px; width:100%">
+        <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; font-weight:500;">Your answers summary</div>
+        <div id="summary" style="font-size:0.9rem; line-height:1.8; color:var(--ink);"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Nav arrows -->
+<div class="nav-arrows">
+  <button class="nav-arrow" id="prevBtn" onclick="prev()" disabled>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <button class="nav-arrow" id="nextBtn" onclick="next()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+  const TOTAL = 11; // total slides (0 = welcome, 11 = thank you)
+  let current = 0;
+  const answers = {};
+  const multiSelections = {};
+  const rankSelections = {};
+  let rankCount = {};
+
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function updateProgress() {
+    const pct = (current / TOTAL) * 100;
+    progressBar.style.width = pct + '%';
+    if (current === 0) {
+      progressText.textContent = 'Third Wheel Survey';
+    } else if (current === TOTAL) {
+      progressText.textContent = 'Complete! 🎉';
+    } else {
+      progressText.textContent = `${current} of ${TOTAL - 1}`;
+    }
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === TOTAL;
+  }
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => slides[current > index ? index + 1 : current - 1]?.classList.remove('exit'), 600);
+    
+    current = index;
+    slides[current].classList.remove('exit');
+    slides[current].classList.add('active');
+    
+    if (current === TOTAL) buildSummary();
+    updateProgress();
+    
+    setTimeout(() => {
+      const input = slides[current].querySelector('input, textarea');
+      if (input) input.focus();
+    }, 400);
+  }
+
+  function next() {
+    if (current < TOTAL) goTo(current + 1);
+  }
+
+  function prev() {
+    if (current > 0) goTo(current - 1);
+  }
+
+  // Single choice
+  function selectChoice(qId, el, value) {
+    document.querySelectorAll(`#${qId} .choice:not(.multi)`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[qId] = value;
+    setTimeout(next, 300);
+  }
+
+  // Multi choice toggle
+  function toggleChoice(qId, el, value) {
+    if (!multiSelections[qId]) multiSelections[qId] = new Set();
+    if (el.classList.contains('selected')) {
+      el.classList.remove('selected');
+      multiSelections[qId].delete(value);
+    } else {
+      el.classList.add('selected');
+      multiSelections[qId].add(value);
+    }
+    answers[qId] = [...multiSelections[qId]].join(', ');
+  }
+
+  // Scale
+  function selectScale(qId, el, value) {
+    document.querySelectorAll(`#${qId} .scale-btn`).forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[qId] = value;
+    setTimeout(next, 300);
+  }
+
+  // Feature ranking
+  function rankFeature(qId, el, value) {
+    if (!rankCount[qId]) rankCount[qId] = 0;
+    if (el.classList.contains('selected')) {
+      // deselect
+      const rank = parseInt(el.querySelector('.feature-rank')?.textContent);
+      el.classList.remove('selected');
+      el.querySelector('.feature-rank')?.remove();
+      rankCount[qId]--;
+      // reorder remaining
+      let r = 1;
+      document.querySelectorAll(`#${qId} .feature-card.selected`).forEach(c => {
+        c.querySelector('.feature-rank').textContent = r++;
+      });
+      if (!rankSelections[qId]) rankSelections[qId] = [];
+      rankSelections[qId] = rankSelections[qId].filter(v => v !== value);
+    } else {
+      if (rankCount[qId] >= 3) return; // max 3
+      rankCount[qId]++;
+      el.classList.add('selected');
+      const badge = document.createElement('div');
+      badge.className = 'feature-rank';
+      badge.textContent = rankCount[qId];
+      el.appendChild(badge);
+      if (!rankSelections[qId]) rankSelections[qId] = [];
+      rankSelections[qId].push(value);
+    }
+    answers[qId] = rankSelections[qId]?.join(' > ') || '';
+  }
+
+  // Build summary
+  function buildSummary() {
+    const q10val = document.getElementById('q10')?.value;
+    if (q10val) answers['q10'] = q10val;
+
+    const labels = {
+      q1: '⏳ Together', q2: '🏠 Living', q3: '😤 Biggest pain',
+      q4: '📱 Currently using', q5: '💬 WhatsApp comfort',
+      q6: '⭐ Top features', q7: '🎯 Likelihood to use',
+      q8: '💰 Willingness to pay', q9: '🚫 Dealbreakers',
+      q10: '💡 Your idea'
+    };
+
+    let html = '';
+    Object.entries(labels).forEach(([key, label]) => {
+      if (answers[key]) {
+        html += `<div style="margin-bottom:6px"><span style="color:var(--muted);font-size:0.8rem">${label}</span><br><strong>${answers[key]}</strong></div>`;
+      }
+    });
+    document.getElementById('summary').innerHTML = html || '<span style="color:var(--muted)">No answers recorded yet.</span>';
+  }
+
+  // Other input toggle
+  function toggleOther(qId, el, inputId) {
+    const wrap = document.getElementById(inputId);
+    const isSelected = el.classList.contains('selected');
+    if (isSelected) {
+      el.classList.remove('selected');
+      wrap.style.display = 'none';
+      // remove the "other" value from answers
+      if (multiSelections[qId]) {
+        multiSelections[qId].forEach(v => {
+          if (v.startsWith('Other: ') || v === '') multiSelections[qId].delete(v);
+        });
+      }
+    } else {
+      el.classList.add('selected');
+      wrap.style.display = 'block';
+      setTimeout(() => wrap.querySelector('input').focus(), 100);
+    }
+    answers[qId] = multiSelections[qId] ? [...multiSelections[qId]].join(', ') : '';
+  }
+
+  function setOtherValue(qId, value) {
+    if (!multiSelections[qId]) multiSelections[qId] = new Set();
+    // remove old other value
+    multiSelections[qId].forEach(v => {
+      if (v.startsWith('Other: ')) multiSelections[qId].delete(v);
+    });
+    if (value.trim()) multiSelections[qId].add('Other: ' + value.trim());
+    answers[qId] = [...multiSelections[qId]].join(', ');
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) next();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') prev();
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>
