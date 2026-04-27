@@ -84,7 +84,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 100px 40px 80px;
+    padding: 120px 40px 100px;
     opacity: 0;
     transform: translateY(60px);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -131,7 +131,7 @@
   /* Question text */
   .q-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-size: clamp(1.35rem, 4.5vw, 2.4rem);
     line-height: 1.25;
     color: var(--ink);
     margin-bottom: 12px;
@@ -476,11 +476,6 @@
     cursor: not-allowed;
   }
 
-  #summary::-webkit-scrollbar { width: 4px; }
-  #summary::-webkit-scrollbar-track { background: var(--warm); border-radius: 4px; }
-  #summary::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  #summary::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
   .other-text {
     border: 1.5px solid var(--border);
     border-radius: 10px;
@@ -492,8 +487,10 @@
   .other-text:focus { border-color: var(--accent); outline: none; }
 
   @media (max-width: 600px) {
-    nav { padding: 16px 20px; }
-    .slide { padding: 80px 20px 100px; }
+    nav { padding: 12px 16px; }
+    .logo { font-size: 1rem; }
+    .progress-text { font-size: 0.72rem; }
+    .slide { padding: 110px 20px 100px; }
     .features-grid { grid-template-columns: 1fr; }
     .scale-btn { width: 44px; height: 44px; }
     .nav-arrows { bottom: 20px; right: 20px; }
@@ -896,7 +893,7 @@
         </p>
       <div style="margin-top:40px; padding: 24px; background: var(--surface); border-radius: 16px; border: 1.5px solid var(--border); text-align:left; max-width: 480px; width:100%; margin-left:auto; margin-right:auto;">
         <div style="font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; font-weight:500;">Your answers summary</div>
-        <div id="summary" style="font-size:0.9rem; line-height:1.8; color:var(--ink); max-height: 280px; overflow-y: auto; padding-right: 8px;"></div>
+        <div id="summary" style="font-size:0.9rem; line-height:1.8; color:var(--ink); "></div>
       </div>
       <div id="submitWrap" style="margin-top: 24px;">
         <button class="btn-next" id="submitBtn" onclick="handleSubmit()" style="background: var(--accent); font-size:1rem; padding: 16px 36px;">
