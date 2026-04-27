@@ -513,7 +513,7 @@
   <div class="slide welcome-slide active" data-index="0">
     <div class="slide-inner">
       <span class="welcome-emoji">🪺</span>
-      <div class="q-title">Help us build the AI your relationship deserves.</div>
+      <div class="q-title">Help us build the third wheel your relationship actually wants.</div>
       <p class="q-subtitle">We're building Third Wheel — an AI assistant that helps couples manage life together via WhatsApp. Before we build more, we want to hear from real couples. Takes 4 minutes.</p>
       <div class="welcome-pills">
         <span class="pill">🛒 Shopping lists</span>
@@ -949,7 +949,7 @@
     slides[current].classList.remove('exit');
     slides[current].classList.add('active');
     
-    if (current === TOTAL) buildSummary();
+    if (current === TOTAL) { buildSummary(); submitToSheet(); }
     updateProgress();
     
     setTimeout(() => {
@@ -1076,6 +1076,36 @@
     });
     if (value.trim()) multiSelections[qId].add('Other: ' + value.trim());
     answers[qId] = [...multiSelections[qId]].join(', ');
+  }
+
+  // Google Sheets submission
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAgjK1YEsOiqcdbZjnPx2dchrRcsd15qcYib5WBbre8qd6nRh7iUMOXsk7m3muYTwCeA/exec';
+
+  async function submitToSheet() {
+    const q10val = document.getElementById('q10')?.value;
+    if (q10val) answers['q10'] = q10val;
+
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          q1: answers['q1'] || '',
+          q2: answers['q2'] || '',
+          q3: answers['q3'] || '',
+          q4: answers['q4'] || '',
+          q5: answers['q5'] || '',
+          q6: answers['q6'] || '',
+          q7: answers['q7'] || '',
+          q8: answers['q8'] || '',
+          q9: answers['q9'] || '',
+          q10: answers['q10'] || ''
+        })
+      });
+    } catch(err) {
+      console.log('Submit error:', err);
+    }
   }
 
   // Keyboard navigation
